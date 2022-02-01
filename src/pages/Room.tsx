@@ -1,14 +1,37 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 
 import { database } from "../services/Firebase";
 import { Button } from "../components/Button";
 import { RoomCode } from "../components/RoomCode";
+import { Question } from "../components/Question";
 import { UseAuth } from "../hooks/UseAuth";
 import { FormatText } from "../hooks/FormatText";
 
 import '../styles/room.scss';
+
+// objeto, chave string e valor objeto
+type BananaQuestions = Record<string, {
+  user: {
+    name: string;
+    avatar: string;
+  },
+  content: string;
+  isAnswered: boolean;
+  isHighLighted: boolean;
+}>
+
+type BananaQuest = {
+  id: string;
+  user: {
+    name: string;
+    avatar: string;
+  },
+  content: string;
+  isAnswered: boolean;
+  isHighLighted: boolean;
+};
 
 type BananaParams = {
   id: string;
@@ -16,11 +39,35 @@ type BananaParams = {
 
 const notify = (message: string) => toast.error(message);
 
+
 function Room() {
   const { user } = UseAuth();
   const params = useParams<BananaParams>();
   const [newQuestion, setNewQuestion] = useState('');
-  const roomId = params.id!; // ! = confia no pai que existe
+  const [questions, setQuestions] = useState<BananaQuest[]>([]);
+  const [title, setTitle] = useState('');
+
+  const roomId = params.id!;
+
+  useEffect(() => {
+    const roomRef = database.ref(`rooms/${roomId}`);
+    roomRef.on('value', room => {
+      const databaseRoom = room.val();
+      const firebaseQuestions: BananaQuestions = databaseRoom.questions ?? {};
+
+      const parsedQuestions = Object.entries(firebaseQuestions).map(([key, value]) => {
+        return {
+          id: key,
+          content: value.content,
+          user: value.user,
+          isAnswered: value.isAnswered,
+          isHighLighted: value.isHighLighted
+        };
+      });
+      setTitle(databaseRoom.title);
+      setQuestions(parsedQuestions);
+    });
+   }, [roomId]);
   
   async function handleSendNewQuestion(event: FormEvent) {
     event.preventDefault();
@@ -53,8 +100,8 @@ function Room() {
 
       <main>
         <div className="title-room">
-          <h1>Nome da sala</h1>
-          <span>4 perguntas</span>
+          <h1>Sala { title }</h1>
+          { questions.length > 0 && <span>{questions.length} pergunta</span> }
         </div>
 
         <form onSubmit={handleSendNewQuestion}>
@@ -78,6 +125,15 @@ function Room() {
             <Button type="submit" disabled={!user}>Enviar pergunta</Button>
           </div>
         </form>
+        <div className="list">
+          {questions.map(question => {
+            return (
+              <Question
+                content={question.content}
+                user={question.user}/>
+            )
+          }) }
+        </div>
       </main>
     </div>
   );
