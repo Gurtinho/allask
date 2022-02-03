@@ -15,6 +15,16 @@
     h1 {
       font-size: 24px;
     }
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      button {
+        height: 32px;
+      }
+    }
   }
 
   main {
@@ -45,7 +55,7 @@
 
     form {
       textarea {
-        min-height: 60px;
+        min-height: 100px;
         height: 150px;
         outline: none;
         resize: vertical;

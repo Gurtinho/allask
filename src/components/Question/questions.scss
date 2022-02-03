@@ -23,15 +23,41 @@
       align-items: center;
 
       img {
-        height: 32px;
-        width: 32px;
+        height: 26px;
+        width: 26px;
         border-radius: 50%;
       }
 
       > span {
         margin-left: 8px;
         color: #737380;
-        font-size: 14px;
+        font-size: 12px;
+      }
+    }
+
+    button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+
+      &.like-button {
+        display: flex;
+        align-items: center;
+        color: #737380;
+        gap: 8px;
+
+        &.liked {
+          color: #835afd;
+
+          svg {
+            fill: #835afd;
+          }
+        }
+      }
+
+      &:hover {
+        filter: brightness(0.8);
+        transition: all 200ms ease-in-out;
       }
     }
   }

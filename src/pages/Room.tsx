@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -6,32 +6,12 @@ import { database } from "../services/Firebase";
 import { Button } from "../components/Button";
 import { RoomCode } from "../components/RoomCode";
 import { Question } from "../components/Question";
+
 import { UseAuth } from "../hooks/UseAuth";
-import { FormatText } from "../hooks/FormatText";
+import { UseFormat } from "../hooks/UseFormat";
+import { UseQuestion } from "../hooks/UseQuestion";
 
-import '../styles/room.scss';
-
-// objeto, chave string e valor objeto
-type BananaQuestions = Record<string, {
-  user: {
-    name: string;
-    avatar: string;
-  },
-  content: string;
-  isAnswered: boolean;
-  isHighLighted: boolean;
-}>
-
-type BananaQuest = {
-  id: string;
-  user: {
-    name: string;
-    avatar: string;
-  },
-  content: string;
-  isAnswered: boolean;
-  isHighLighted: boolean;
-};
+import './styles/room.scss';
 
 type BananaParams = {
   id: string;
@@ -42,40 +22,21 @@ const notify = (message: string) => toast.error(message);
 
 function Room() {
   const { user } = UseAuth();
-  const params = useParams<BananaParams>();
   const [newQuestion, setNewQuestion] = useState('');
-  const [questions, setQuestions] = useState<BananaQuest[]>([]);
-  const [title, setTitle] = useState('');
-
+  const params = useParams<BananaParams>();
   const roomId = params.id!;
+  const { title, questions } = UseQuestion(roomId);
 
-  useEffect(() => {
-    const roomRef = database.ref(`rooms/${roomId}`);
-    roomRef.on('value', room => {
-      const databaseRoom = room.val();
-      const firebaseQuestions: BananaQuestions = databaseRoom.questions ?? {};
-
-      const parsedQuestions = Object.entries(firebaseQuestions).map(([key, value]) => {
-        return {
-          id: key,
-          content: value.content,
-          user: value.user,
-          isAnswered: value.isAnswered,
-          isHighLighted: value.isHighLighted
-        };
-      });
-      setTitle(databaseRoom.title);
-      setQuestions(parsedQuestions);
-    });
-   }, [roomId]);
-  
   async function handleSendNewQuestion(event: FormEvent) {
     event.preventDefault();
+
     if (newQuestion.trim() == '') return notify('Você não fez sua pergunta');
     if (!user) return notify('Faça login primeiro');
 
-    const quest = FormatText(newQuestion);
-    
+    const quest = UseFormat(newQuestion);
+
+    console.log(event.target);
+
     const question = {
       content: quest,
       user: {
@@ -87,6 +48,19 @@ function Room() {
     };
 
     await database.ref(`rooms/${roomId}/questions`).push(question);
+    };
+
+  async function handleLikeQuestion(questionId: string, likeId: string | undefined) {
+    
+    if (!user) return notify('Faça login primeiro');
+
+    if (likeId) {
+      await database.ref(`rooms/${roomId}/questions/${questionId}/likes/${likeId}`).remove();
+    } else {
+      await database.ref(`rooms/${roomId}/questions/${questionId}/likes`).push({
+        userId: user?.id
+      });
+    };
   };
   
   return (
@@ -101,7 +75,8 @@ function Room() {
       <main>
         <div className="title-room">
           <h1>Sala { title }</h1>
-          { questions.length > 0 && <span>{questions.length} pergunta</span> }
+          {questions.length == 1 && <span>{questions.length} pergunta</span>}
+          {questions.length > 1 && <span>{questions.length} perguntas</span>}
         </div>
 
         <form onSubmit={handleSendNewQuestion}>
@@ -126,11 +101,24 @@ function Room() {
           </div>
         </form>
         <div className="list">
-          {questions.map(question => {
+          {questions.slice(0).reverse().map(question => {
             return (
               <Question
+                key={question.id}
                 content={question.content}
-                user={question.user}/>
+                user={question.user}>
+                  <button
+                    className={`like-button ${question.likeId ? 'liked' : ''}`}
+                    type="button"
+                  area-aria-label="marcar como gostei"
+                  onClick={() => handleLikeQuestion(question.id, question.likeId)}>
+                    {question.likeCount > 0 && <span>{question.likeCount}</span>}
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#737380">
+                      <path d="M0 0h24v24H0V0z" fill="none"/>
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                  </button>
+              </Question>
             )
           }) }
         </div>

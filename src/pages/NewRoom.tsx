@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Link } from 'react-router-dom';
 
-import '../styles/auth.scss';
+import './styles/auth.scss';
 import { UseAuth } from '../hooks/UseAuth';
 import { database } from '../services/Firebase';
 
@@ -16,7 +16,7 @@ function NewRoom() {
 	async function handleCreateNewRoom(event: FormEvent) {
 		event.preventDefault();
 
-		if (newRoom.trim() === ' ') return;
+		if (newRoom.trim() == ' ') return;
 
 		const roomRef = database.ref('rooms');
 		const firebaseRooms = await roomRef.push({
@@ -24,7 +24,7 @@ function NewRoom() {
 			userId: user?.id,
 		});
 
-		location(`/rooms/${firebaseRooms.key}`);
+		location(`/rooms/admin/${firebaseRooms.key}`);
 	};
 
 	return (
@@ -32,7 +32,7 @@ function NewRoom() {
 			<aside>
 				<img src={illustration} alt="ilustração" />
 				<strong>Crie salas ao vivo</strong>
-				<p>Tire dúvidas em tempo rel</p>
+				<p>Tire dúvidas em tempo real</p>
 			</aside>
 
 			<main>

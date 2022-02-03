@@ -1,4 +1,5 @@
-import '../styles/questions.scss';
+import { ReactNode } from 'react';
+import './questions.scss';
 
 type BananaProps = {
   content: string;
@@ -6,9 +7,10 @@ type BananaProps = {
     name: string;
     avatar: string;
   }
+  children?: ReactNode;
 };
 
-function Question({ content, user }: BananaProps) {
+function Question({ content, user, children }: BananaProps) {
   return (
     <div className="question">
       <p>{content}</p>
@@ -17,7 +19,7 @@ function Question({ content, user }: BananaProps) {
           <img src={user.avatar} alt={user.name} />
           <span>{user.name}</span>
         </div>
-        <div></div>
+        <div>{children}</div>
       </footer>
     </div>
   );

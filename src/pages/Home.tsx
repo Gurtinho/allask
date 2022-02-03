@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FormEvent, useState } from 'react';
 import { UseAuth } from '../hooks/UseAuth';
 
@@ -8,7 +8,7 @@ import { Button } from '../components/Button';
 import { database } from '../services/Firebase';
 import toast, { Toaster } from 'react-hot-toast';
 
-import '../styles/auth.scss';
+import './styles/auth.scss';
 
 const notify = (message: string) => toast.error(message);
 
@@ -24,12 +24,23 @@ function Home() {
 
 	async function handleJoinRoom(event: FormEvent) {
 		event.preventDefault();
+		// if (!user) {
+		// 	await singinWithGoogle();
+		// };
 
-		if (roomCode.trim() == '') return notify('Insira o código da sala');
+		if (roomCode.trim() == '') {
+			return notify('Insira o código da sala');
+		};
 
 		const roomRef = await database.ref(`rooms/${roomCode}`).get();
 
-		if (!roomRef.exists()) return notify('Código inválido');
+		if (!roomRef.exists()) {
+			return notify('Código da sala inválido');
+		};
+
+		if (roomRef.val().endAt) {
+			return notify('Esta sala foi encerrada');
+		}
 
 		location(`/rooms/${roomCode}`);
 	};
@@ -46,14 +57,23 @@ function Home() {
 				<div className='main-content'>
 					<h1>All Ask</h1>
 
-					<button onClick={handleCreateRoom} className='create-room'>
+					{!user &&
+						<button onClick={handleCreateRoom} className='create-room'>
 							<img src={googleImg} alt="Google" />
-							Crie sua sala com o Google
-					</button>
+							Conectar com o google
+						</button>
+					}
+					{user && 
+						<Link className='link' to='rooms/new'>
+							<button className='create-room'>
+								Criar uma sala
+							</button>
+						</Link>
+					}
 
 					<div className='separator'>Ou entre em uma sala</div>
 					
-					<form onSubmit={handleJoinRoom}><Toaster position='top-right'/>
+					<form onSubmit={handleJoinRoom}><Toaster position='top-center'/>
 						<input
 							type="text"
 							placeholder='Digite o código da sala'

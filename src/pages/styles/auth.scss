@@ -62,6 +62,16 @@
       font-family: 'Poppins', sans-serif;
     }
 
+    .link {
+      text-decoration: none;
+      color: #fff;
+
+      button {
+        width: 100%;
+        background-color: #835afd;
+      }
+    }
+
     form {
       display: flex;
       flex-direction: column;

@@ -1,5 +1,5 @@
-import copyImg from '../assets/images/copy.svg';
-import '../styles/roomCode.scss';
+import copyImg from '../../assets/images/copy.svg';
+import './roomCode.scss';
 
 type BananaProps = {
   code: string;
