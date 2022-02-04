@@ -30,12 +30,14 @@ function Room() {
   async function handleSendNewQuestion(event: FormEvent) {
     event.preventDefault();
 
-    if (newQuestion.trim() == '') return notify('Você não fez sua pergunta');
-    if (!user) return notify('Faça login primeiro');
+    if (newQuestion.trim() == '') {
+      return notify('Você não fez sua pergunta');
+    };
+    if (!user) {
+      return notify('Faça login primeiro');
+    };
 
     const quest = UseFormat(newQuestion);
-
-    console.log(event.target);
 
     const question = {
       content: quest,
@@ -51,11 +53,14 @@ function Room() {
     };
 
   async function handleLikeQuestion(questionId: string, likeId: string | undefined) {
-    
-    if (!user) return notify('Faça login primeiro');
+
+    if (!user) {
+      return notify('Faça login primeiro');
+    };
 
     if (likeId) {
       await database.ref(`rooms/${roomId}/questions/${questionId}/likes/${likeId}`).remove();
+
     } else {
       await database.ref(`rooms/${roomId}/questions/${questionId}/likes`).push({
         userId: user?.id

@@ -24,10 +24,7 @@ function Home() {
 
 	async function handleJoinRoom(event: FormEvent) {
 		event.preventDefault();
-		// if (!user) {
-		// 	await singinWithGoogle();
-		// };
-
+		
 		if (roomCode.trim() == '') {
 			return notify('Insira o código da sala');
 		};

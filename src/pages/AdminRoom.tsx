@@ -50,10 +50,10 @@ function AdminRoom() {
           <h1>All Ask</h1>
           <div>
             <RoomCode code={roomId} />
-            <Button
-              isOutlined
-              onClick={() => handleCloseRoom()}
-            >Encerrar sala</Button>
+            <Button isOutlined
+              onClick={() => handleCloseRoom()}>
+              Encerrar sala
+            </Button>
           </div>
         </div>
       </header>
